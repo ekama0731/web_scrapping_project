@@ -11,16 +11,21 @@ industry_count = glass %>%
   summarise(count=n()) %>%
   filter(industry != '' & count>25)
 
-industry_Count = ggplot(industry_count, aes(x=reorder(industry, count), y=count, fill = count)) + 
-  geom_bar(stat = 'identity', colour = 'black') + 
-  geom_text(aes(label = industry_count$count, vjust=-.25)) +
-  theme(plot.subtitle = element_text(vjust = 1), plot.caption = element_text(vjust = 1), panel.grid.major = element_line(size = 1), panel.grid.minor = element_line(size = 1), 
-    axis.title = element_text(size = 13, face = "bold"), axis.text = element_text(size = 15), 
-    axis.text.x = element_text(size = 12, vjust = 0.5, angle = -90), axis.text.y = element_text(size = 15), 
-    plot.title = element_text(size = 19, face = "bold", hjust = 0.5), legend.text = element_text(face = "bold"), 
-    legend.title = element_text(size = 15, face = "bold"), panel.background = element_rect(fill = "white", size = 1), plot.background = element_rect(fill = "white", size = 1)) +
-  labs(title = "Number of Job Postings in each Industry", x = "Industry", y = "Count", fill = "Count")
+#industry_Count = ggplot(industry_count, aes(x=reorder(industry, count), y=count, fill = count)) + 
+ # geom_bar(stat = 'identity', colour = 'black') + 
+  #geom_text(aes(label = industry_count$count, vjust=-.25)) +
+  #theme(plot.subtitle = element_text(vjust = 1), plot.caption = element_text(vjust = 1), panel.grid.major = element_line(size = 1), panel.grid.minor = element_line(size = 1), 
+   # axis.title = element_text(size = 13, face = "bold"), axis.text = element_text(size = 15), 
+    #axis.text.x = element_text(size = 12, vjust = 0.5, angle = -90), axis.text.y = element_text(size = 15), 
+    #plot.title = element_text(size = 19, face = "bold", hjust = 0.5), legend.text = element_text(face = "bold"), 
+    #legend.title = element_text(size = 15, face = "bold"), panel.background = element_rect(fill = "white", size = 1), plot.background = element_rect(fill = "white", size = 1)) +
+  #labs(title = "Number of Job Postings in each Industry", x = "Industry", y = "Count", fill = "Count")
 
+industry_Count = plot_ly(industry_count, x=~reorder(industry,count),y=~count, color = ~industry, hoverinfo = 'text',
+        text = ~paste('Industry: ', industry,
+                      '<br> Count: ', count)) %>%
+  layout(yaxis = list(title = 'Count'), xaxis = list(title = 'Industry'), title = 'Count per Industry', autosize = T , plot_ly(width = 1000), plot_ly(height = 400), 
+         margin = list(l = 50, r = 75, b = 150, t = 50, pad = 1))
 industry_Count
 
 # Looking at salary vs industry ####
@@ -79,23 +84,38 @@ chart_link = api_create(city_salary, filename = "City salary")
 
 
 # Looking at the number of job posting per state ####
-state_count = glass %>%
-  group_by(state) %>%
-  summarise(count = n()) %>%
-  filter(count>2)
 
-state_Count = ggplot(state_count, aes(x= reorder(state, count),y= count, fill=count)) +
-  geom_bar(stat='identity', colour = 'black')+
-  geom_text(aes(label=count, vjust=-.25)) + 
-  theme(plot.subtitle = element_text(size = 15, hjust = 0.5, vjust = 1), 
-        plot.caption = element_text(vjust = 1),
-        axis.text.x = element_text(size = 12, vjust = 0.5, angle = -90),
-        axis.title = element_text(size = 15, face = "bold"), axis.text = element_text(face = "bold"), 
-        plot.title = element_text(size = 19, face = "bold", hjust = 0.5), legend.title = element_text(size = 15, face = "bold"), panel.background = element_rect(fill = "white"), 
-        plot.background = element_rect(fill = "white")) +
-  labs(title = "Job posting in each state", x = "State", y = "Count", fill = "Count", subtitle = "Last 30 days")
+State_count = glass %>%
+  group_by(state)%>%
+  summarise(count=n()) %>%
+  filter(count>20)
 
-state_Count
+State_Count=plot_ly(State_count, x = ~reorder(state,count), y = ~count, type = 'bar', color = ~state,hoverinfo = 'text',
+                   text = ~paste('State: ', state,
+                                 '<br> Count: ', count)) %>%
+  layout(xaxis = list(title = 'States'), yaxis = list(title = 'Number of Job Postings'), title = 'Job Postings in Each State',
+         margin = list(l = 50, r = 75, b = 150, t = 50, pad = 1))
+
+State_Count
+chart_link = api_create(city_Count, filename = "State Count")
+
+#state_count = glass %>%
+ # group_by(state) %>%
+  #summarise(count = n()) %>%
+  #filter(count>2)
+
+#state_Count = ggplot(state_count, aes(x= reorder(state, count),y= count, fill=count)) +
+ # geom_bar(stat='identity', colour = 'black')+
+  #geom_text(aes(label=count, vjust=-.25)) + 
+  #theme(plot.subtitle = element_text(size = 15, hjust = 0.5, vjust = 1), 
+   #     plot.caption = element_text(vjust = 1),
+     #   axis.text.x = element_text(size = 12, vjust = 0.5, angle = -90),
+    #    axis.title = element_text(size = 15, face = "bold"), axis.text = element_text(face = "bold"), 
+      #  plot.title = element_text(size = 19, face = "bold", hjust = 0.5), legend.title = element_text(size = 15, face = "bold"), panel.background = element_rect(fill = "white"), 
+       # plot.background = element_rect(fill = "white")) +
+  #labs(title = "Job posting in each state", x = "State", y = "Count", fill = "Count", subtitle = "Last 30 days")
+
+#state_Count
 # looking at the average price salary per state ####
 state_salary = plot_ly(glass,x =~reorder(state, salary_estimate), y=~salary_estimate, color=~state, type='box') %>%
   layout(xaxis = list(title = 'State'), yaxis = list(title='Salary'), title = 'Salary Per State')
@@ -105,7 +125,7 @@ chart_link = api_create(state_salary, filename = "Salary Per State")
 
 # Looking at state vs rating ####
 state_vs_rating = glass %>%
-  arrange(rating)
+  group_by(state)
 
 state_vs_Rating = plot_ly(state_vs_rating, x=~reorder(state,rating), y=~ rating, color = ~state, sort = FALSE,type = 'box') %>%
   layout(xaxis = list(title='State', size = 20), yaxis = list(title = 'Rating', size = 20 ), title = 'Rating Per State', size= 30)
@@ -121,7 +141,7 @@ city_tex = glass %>%
   filter(state == ' TX') %>%
   summarise( salary = mean(salary_estimate), count = n()) %>%
   filter(count>2)
-city_Tex = plot_ly(city_tex, x = ~reorder(city,count), y = ~count, type = 'bar', color = ~city,hoverinfo = 'text',
+city_Tex = plot_ly(city_tex, x = ~reorder(city,salary), y = ~count, type = 'bar', color = ~city,hoverinfo = 'text',
                    text = ~paste('City: ', city,
                                  '<br> Count: ', count,
                                  '<br> Salary Average: ', salary)) %>%
